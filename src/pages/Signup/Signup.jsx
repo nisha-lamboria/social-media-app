@@ -3,15 +3,13 @@ import { Link } from "react-router-dom";
 import { FirebaseContext } from "../../context/firebasecontext";
 import { userExists } from "../../services/firebaseServices";
 
-const Login = () => {
-  const [emailAddress, setEmailAddress] = useState("");
-  const [password, setPassword] = useState("");
+const Signup = () => {
   const emailRef=useRef("");
   const passwordRef=useRef("");
   const userNameRef=useRef("");
   const fullNameRef=useRef("");
 
-  const {firebaseInit}=useContext(FirebaseContext);  
+  const {firebaseInit}=useContext(FirebaseContext); 
 
   const [error, setError] = useState("");
   const isInvalid = passwordRef === "" || emailRef === "";
@@ -25,6 +23,10 @@ const Login = () => {
         .auth()
         .createUserWithEmailAndPassword(emailRef.current.value,passwordRef.current.value);
 
+        await createdUser.user.updateProfile({
+          displayName:userNameRef.current.value.toLowerCase()
+        })
+
         await firebaseInit
         .firestore()
         .collection('users')
@@ -32,13 +34,16 @@ const Login = () => {
           userId:createdUser.user.uid,
           username: userNameRef.current.value.toLowerCase(),
           fullName:fullNameRef.current.value,
-          emailAddress: emailRef.cureent.value.toLowerCase(),
+          emailAddress: emailRef.current.value.toLowerCase(),
           following: ['2'],
           followers: [],
           dateCreated: Date.now()
         });
         console.log("user created");
       }catch(error){
+        fullNameRef.current.value="";
+        emailRef.current.value="";
+        passwordRef.current.value="";
         setError(error.message);
       }
     }else{
@@ -63,7 +68,6 @@ const Login = () => {
               type="text"
               placeholder="User Name"
               className="text-sm text-gray-base w-full mr-3 py-5 px-4 h-2 border border-gray-primary rounded mb-2"
-              // onChange={({ target }) => setUserName(target.value)}
               ref={userNameRef}
             />
             <input
@@ -71,7 +75,6 @@ const Login = () => {
               type="text"
               placeholder="Full Name"
               className="text-sm text-gray-base w-full mr-3 py-5 px-4 h-2 border border-gray-primary rounded mb-2"
-              // onChange={({ target }) => setUserName(target.value)}
               ref={fullNameRef}
             />
             <input
@@ -79,7 +82,6 @@ const Login = () => {
               type="text"
               placeholder="Email address"
               className="text-sm text-gray-base w-full mr-3 py-5 px-4 h-2 border border-gray-primary rounded mb-2"
-              // onChange={({ target }) => setEmailAddress(target.value)}
               ref={emailRef}
             />
             <input
@@ -87,7 +89,6 @@ const Login = () => {
               type="password"
               placeholder="Password"
               className="text-sm text-gray-base w-full mr-3 py-5 px-4 h-2 border border-gray-primary rounded mb-2"
-              onChange={({ target }) => setPassword(target.value)}
               ref={passwordRef}
             />
             <button
@@ -96,15 +97,15 @@ const Login = () => {
               className={`bg-red-medium text-white w-full rounded h-8 font-bold
             ${isInvalid && "opacity-50"}`}
             >
-              Login
+              Signup
             </button>
           </form>
         </div>
         <div className="flex justify-center items-center flex-col w-full bg-white p-4 rounded border border-gray-primary">
           <p className="text-sm">
-            Don't have an account?{` `}
+            Already have an acoount?{` `}
             <Link to="/" className="font-bold text-blue-medium">
-              Sign up
+              Sign in
             </Link>
           </p>
         </div>
@@ -113,4 +114,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
